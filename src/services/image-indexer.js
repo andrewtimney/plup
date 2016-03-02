@@ -1,6 +1,6 @@
-var fs = require('fs');
-var _ = require('lodash');
-var moment = require('moment');
+import fs from 'fs'
+import _ from 'lodash'
+import moment from 'moment'
 
 const indexFilePath = '../indexed-pics.json'
 
