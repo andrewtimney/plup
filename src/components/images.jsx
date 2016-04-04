@@ -5,28 +5,30 @@ import _ from 'lodash'
 export class Images extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { new: [], old: [] };
+    this.state = {imgs:[]};
   }
   componentWillMount(){
     var imgFiles = new ImageFiles();
-    var images = imgFiles.getNewAndOld();
-    this.setState(images);
+    imgFiles.getNewAndOld()
+        .then((images)=>{
+            this.setState({imgs:images});
+        });
   }
   render(){
 
     var imgs = [];
-    var just = _.take(this.state.new, 100);
+    var just = _.take(this.state.imgs, 100);
     just.forEach(function(e, i){
-      imgs.push(<div key={i}>
-          <img src={e.path} width="250" />
+        imgs.push(<div key={i}>
+          <img src="https://placehold.it/250x250" data-src={e.path} width="250" />
         </div>);
     });
 
     return <div>
-      <div style={{display: "flex"}}>
+      <div style={{display: "flex", flexWrap:"wrap"}}>
         {imgs}
       </div>
-        <div>{this.state.new.length}</div>
+        <div>{this.state.imgs.length}</div>
         <div>Images here</div>
       </div>
   }

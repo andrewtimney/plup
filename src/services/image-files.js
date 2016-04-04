@@ -1,7 +1,10 @@
 import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
-import {getPictures} from './image-indexer'
+import {getSavedPictures} from './image-indexer'
+import getExif from './exif-service'
+import moment from 'moment'
+import Promise from "bluebird"
 
 export class ImageFiles {
 
@@ -27,7 +30,7 @@ export class ImageFiles {
   getImagesAndFileDetails(folder){
     return this.findImages(folder).map((img)=>{
       return {
-        file: img,
+            file: img,
   			path: path.join(folder, img), //TODO: FIX FOLDER
   			fstat: fs.statSync(path.join(folder, img))
       }
@@ -36,18 +39,34 @@ export class ImageFiles {
 
   getNewAndOld(){
     var allFiles = [];
-    var savedFiles = getPictures();
+    var savedFiles = getSavedPictures();
 
+    var exifPromies = [];
     this.pictureFolders.forEach((folder)=>{
-      allFiles = allFiles.concat(this.getImagesAndFileDetails(folder));
-    })
+        var newFiles = this.getImagesAndFileDetails(folder).map((picture)=>{
+            picture.dateTime = moment(0);
+            picture.date = '';
+            if(picture.path.indexOf(".png") === -1){
+                exifPromies.push(getExif(picture.path)
+                    .then((exifData)=>{
+                        if(exifData){
+                            picture.exif = exifData;
+                            this.getCreatedDate(picture);
+                        }
+                        return picture;
+                    }));
+            }
+            return picture;
+        });
+        allFiles = allFiles.concat(newFiles);
+    });
 
-    var newFiles = this.getNewFiles(savedFiles, allFiles);
-
-    return {
-      new: newFiles,
-      old: savedFiles
-    }
+    return Promise.all(exifPromies)
+        .then((files)=>{
+             return _.sortBy(savedFiles.concat(files), (file)=>{
+                return -file.dateTime.valueOf();
+            })
+        });
   }
 
   getNewFiles(saved, allFiles){
@@ -57,4 +76,12 @@ export class ImageFiles {
   		 });
   	 });
   }
+  
+  getCreatedDate(picture){
+      if (picture.exif.exif.DateTimeOriginal ||picture.exif.CreatedDate) {
+        picture.dateTime = moment(picture.exif.exif.DateTimeOriginal || picture.exif.exif.CreatedDate, "YYYY:MM:DD HH:mm:SS");
+        picture.date = picture.dateTime.format('DD/MM/YYYY');  
+    }
+  }
+ 
 }

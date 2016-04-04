@@ -4,17 +4,15 @@ import moment from 'moment'
 
 const indexFilePath = '../indexed-pics.json'
 
-export function getPictures(){
+export function getSavedPictures(){
   try {
     var pics = require(indexFilePath);
     return pics;
   }
-  catch(err){
-     console.log('Error reading pics file:'+err);
+  catch(e){
   }
   return [];
 }
-
 
 export function savePictures(pics) {
   var sorted = _.sortBy(pics, function (pic) {
