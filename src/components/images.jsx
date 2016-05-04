@@ -1,6 +1,7 @@
 import React from 'react'
 import { ImageFiles } from '../services/image-files'
 import _ from 'lodash'
+import { createThumbnail } from '../services/thumbnail-service'
 
 export class Images extends React.Component {
   constructor(props) {
@@ -14,14 +15,20 @@ export class Images extends React.Component {
             this.setState({imgs:images});
         });
   }
+  thumbnailCreated(){
+    console.log('shit');
+  }
   render(){
-
+    var self = this;
     var imgs = [];
     var just = _.take(this.state.imgs, 100);
+    
     just.forEach(function(e, i){
         imgs.push(<div key={i}>
           <img src="https://placehold.it/250x250" data-src={e.path} width="250" />
         </div>);
+        
+        createThumbnail(e.path).then(self.thumbnailCreated.bind(self));
     });
 
     return <div>

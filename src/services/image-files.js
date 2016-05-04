@@ -30,7 +30,7 @@ export class ImageFiles {
   getImagesAndFileDetails(folder){
     return this.findImages(folder).map((img)=>{
       return {
-            file: img,
+        file: img,
   			path: path.join(folder, img), //TODO: FIX FOLDER
   			fstat: fs.statSync(path.join(folder, img))
       }
