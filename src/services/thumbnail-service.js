@@ -30,3 +30,15 @@ export function createThumbnail(imagepath){
         console.error(err);
     });
 }
+
+export function createThumbnailProcess(path){
+  var pro = require('child_process');
+  var crt = pro.spawn('node', ['./thumbnail-process.js'], { stdio: ['pipe'] });
+  crt.stdout.on('data', function(buffer){
+    console.log('data');
+  });
+  crt.stdout.on('end', function(){
+    console.log('END', arguments);
+    //event.sender.send('exif-complete', sorted);
+  });
+}
