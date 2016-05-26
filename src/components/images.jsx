@@ -1,7 +1,7 @@
 import React from 'react'
 import { ImageFiles } from '../services/image-files'
 import _ from 'lodash'
-import { createThumbnail } from '../services/thumbnail-service'
+import { createThumbnailProcess } from '../services/thumbnail-service'
 
 export class Images extends React.Component {
   constructor(props) {
@@ -15,8 +15,8 @@ export class Images extends React.Component {
             this.setState({imgs:images});
         });
   }
-  thumbnailCreated(){
-    console.log('shit');
+  thumbnailCreated(result){
+    console.log('thumbnailCreated', result);
   }
   render(){
     var self = this;
@@ -28,7 +28,7 @@ export class Images extends React.Component {
           <img src="https://placehold.it/250x250" data-src={e.path} width="250" />
         </div>);
         
-        createThumbnail(e.path).then(self.thumbnailCreated.bind(self));
+        createThumbnailProcess(e.path).then(self.thumbnailCreated.bind(self));
     });
 
     return <div>
