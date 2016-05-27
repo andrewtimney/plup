@@ -9,12 +9,12 @@ export function createThumbnailProcess(filepath){
         
         crt.stdout.on('data', function(buffer){
             console.log('data', buffer);
-            resolve(buffer.toString());
+           // resolve(buffer.toString());
         });
         
         crt.stdout.on('end', function(){
             console.log('END', arguments);
-            resolve('WIT');
+            //resolve('WIT');
         });
     });
 }

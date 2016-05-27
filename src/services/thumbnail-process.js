@@ -4,13 +4,12 @@ import easyimg from 'easyimage'
 import fs from 'fs'
 
 const thumbnailFolder = "../thumbnails"
-console.log('PROCESS', process.argv);
 
 function createThumbnail(imagepath){
     
     let thumbnailPath = path.join(__dirname, thumbnailFolder, path.basename(imagepath));
     
-    try{
+    try {
         fs.statSync(thumbnailPath);
         return Promise.resolve([]);
     }
@@ -26,7 +25,6 @@ function createThumbnail(imagepath){
         quality: 80
     })
     .then(function(result){
-        // Success
         console.log(thumbnailPath)
     }, function(err){
         console.error(err);

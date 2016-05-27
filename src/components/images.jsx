@@ -28,7 +28,7 @@ export class Images extends React.Component {
           <img src="https://placehold.it/250x250" data-src={e.path} width="250" />
         </div>);
         
-        createThumbnailProcess(e.path).then(self.thumbnailCreated.bind(self));
+        //createThumbnailProcess(e.path).then(self.thumbnailCreated.bind(self));
     });
 
     return <div>

@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
-import {getSavedPictures} from './image-indexer'
+import {getSavedPictures,savePictures} from './image-indexer'
 import getExif from './exif-service'
 import moment from 'moment'
 import Promise from "bluebird"
@@ -39,11 +39,17 @@ export class ImageFiles {
 
   getNewAndOld(){
     var allFiles = [];
-    var savedFiles = getSavedPictures();
-
     var exifPromies = [];
+    var savedFiles = getSavedPictures();
+    console.log('saved files', savedFiles.length);
+    
     this.pictureFolders.forEach((folder)=>{
-        var newFiles = this.getImagesAndFileDetails(folder).map((picture)=>{
+        var newFiles = this.getImagesAndFileDetails(folder);
+        
+        newFiles = _.filter(newFiles, (img)=>{
+          return !_.some(savedFiles, {'path': img.path});
+        });
+        newFiles.map((picture)=>{
             picture.dateTime = moment(0);
             picture.date = '';
             if(picture.path.indexOf(".png") === -1){
@@ -56,13 +62,16 @@ export class ImageFiles {
                         return picture;
                     }));
             }
+            //console.log(picture.file);
             return picture;
         });
+        
         allFiles = allFiles.concat(newFiles);
     });
 
     return Promise.all(exifPromies)
         .then((files)=>{
+              savePictures(files);
              return _.sortBy(savedFiles.concat(files), (file)=>{
                 return -file.dateTime.valueOf();
             })
