@@ -41,14 +41,10 @@ export class ImageFiles {
     var allFiles = [];
     var exifPromies = [];
     var savedFiles = getSavedPictures();
-    console.log('saved files', savedFiles.length);
     
     this.pictureFolders.forEach((folder)=>{
         var newFiles = this.getImagesAndFileDetails(folder);
         
-        newFiles = _.filter(newFiles, (img)=>{
-          return !_.some(savedFiles, {'path': img.path});
-        });
         newFiles.map((picture)=>{
             picture.dateTime = moment(0);
             picture.date = '';
@@ -56,13 +52,12 @@ export class ImageFiles {
                 exifPromies.push(getExif(picture.path)
                     .then((exifData)=>{
                         if(exifData){
-                            picture.exif = exifData;
+                           picture.exif = exifData;
                             this.getCreatedDate(picture);
                         }
                         return picture;
                     }));
             }
-            //console.log(picture.file);
             return picture;
         });
         
@@ -71,10 +66,27 @@ export class ImageFiles {
 
     return Promise.all(exifPromies)
         .then((files)=>{
-              savePictures(files);
-             return _.sortBy(savedFiles.concat(files), (file)=>{
+            
+            let onlyNew = _.filter(allFiles, (img)=>{
+              let isOld = _.some(savedFiles, function(im){
+                return im.file.trim() === img.file.trim();
+              });
+              
+              if(!isOld){
+                let found = _.find(savedFiles, {'file': img.file})
+                console.log(img.file, found && found.file);
+              }
+              return !isOld;
+            });
+            
+            let all = savedFiles.concat(onlyNew);
+
+            let sorted =  _.sortBy(all, (file)=>{
                 return -file.dateTime.valueOf();
-            })
+            });
+            
+            savePictures(sorted);
+            return sorted;
         });
   }
 
