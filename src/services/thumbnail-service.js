@@ -9,14 +9,33 @@ export function createThumbnailProcess(filepath){
         
         crt.stdout.on('data', function(buffer){
             console.log('data', buffer);
-           // resolve(buffer.toString());
         });
         
         crt.stdout.on('end', function(){
             console.log('END', arguments);
-            //resolve('WIT');
         });
     });
 }
 
- 
+ export function createThumbnailProcessAll(){
+    return new Promise((resolve, reject)=>{
+        
+        var crt = pro.spawn('node', [path.join(__dirname, 'thumbnail-process-ar.js')], { stdio: ['pipe'] });
+        let processed = [];
+        
+        crt.stdout.on('data', function(buffer){
+            console.log('data');
+            let processedStr = buffer.toString();
+            try{
+                processed.push(JSON.parse(processedStr));
+            }
+            catch(er){
+            }
+        });
+        
+        crt.stdout.on('end', function(){
+            console.log('END', arguments);
+            resolve(processed);
+        });
+    });
+}

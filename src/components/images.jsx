@@ -1,7 +1,6 @@
 import React from 'react'
-import { ImageFiles } from '../services/image-files'
 import _ from 'lodash'
-import { createThumbnailProcess } from '../services/thumbnail-service'
+import {ipcRenderer} from 'electron'
 
 export class Images extends React.Component {
   constructor(props) {
@@ -9,11 +8,13 @@ export class Images extends React.Component {
     this.state = {imgs:[]};
   }
   componentWillMount(){
-    var imgFiles = new ImageFiles();
-    imgFiles.getNewAndOld()
-        .then((images)=>{
-            this.setState({imgs:images});
-        });
+    ipcRenderer.on('done', ()=>{
+      console.log('done');
+    });
+    ipcRenderer.on('log', (event, arg)=>{
+      console.log('log', arg);
+    });
+    ipcRenderer.send('start');
   }
   thumbnailCreated(result){
     console.log('thumbnailCreated', result);
@@ -27,8 +28,6 @@ export class Images extends React.Component {
         imgs.push(<div key={i}>
           <img src="https://placehold.it/250x250" data-src={e.path} width="250" />
         </div>);
-        
-        //createThumbnailProcess(e.path).then(self.thumbnailCreated.bind(self));
     });
 
     return <div>

@@ -7,7 +7,7 @@ const indexFilePath = '../indexed-pics.json'
 
 export function getSavedPictures(){
   try {
-    var pics = require(indexFilePath);
+    var pics = require(path.join(__dirname, indexFilePath));
     return pics;
   }
   catch(e){

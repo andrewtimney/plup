@@ -1,5 +1,4 @@
 'use strict';
-
 const electron = require('electron');
 // Module to control application life.
 const app = electron.app;
@@ -49,3 +48,6 @@ app.on('activate', function () {
     createWindow();
   }
 });
+
+const imf = require('./build/services/image-files')
+let im = new imf.ImageFiles(); 

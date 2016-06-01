@@ -5,6 +5,8 @@ import {getSavedPictures,savePictures} from './image-indexer'
 import getExif from './exif-service'
 import moment from 'moment'
 import Promise from "bluebird"
+import { createThumbnailProcess, createThumbnailProcessAll } from '../services/thumbnail-service'
+import {ipcMain} from 'electron'
 
 export class ImageFiles {
 
@@ -13,6 +15,7 @@ export class ImageFiles {
     var dropbox = path.join(user, 'Pictures');
     var pictures = path.join(user, 'dropbox', 'Camera Uploads');
     this.pictureFolders = [dropbox, pictures];
+    ipcMain.on('start', this.getNewAndOld.bind(this));
   }
 
   findImages(folder){
@@ -37,7 +40,7 @@ export class ImageFiles {
     });
   }
 
-  getNewAndOld(){
+  getNewAndOld(event){
     var allFiles = [];
     var exifPromies = [];
     var savedFiles = getSavedPictures();
@@ -63,7 +66,7 @@ export class ImageFiles {
         
         allFiles = allFiles.concat(newFiles);
     });
-
+event.sender.send('log', 'returning');
     return Promise.all(exifPromies)
         .then((files)=>{
             
@@ -84,8 +87,12 @@ export class ImageFiles {
             let sorted =  _.sortBy(all, (file)=>{
                 return -file.dateTime.valueOf();
             });
-            
+             event.sender.send('log', 'saving');
             savePictures(sorted);
+            
+            createThumbnailProcessAll();
+            //ipcMain.send('done', sorted);
+            event.sender.send('log', 'ending');
             return sorted;
         });
   }
