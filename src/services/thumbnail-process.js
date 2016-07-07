@@ -11,10 +11,9 @@ function createThumbnail(imagepath){
     
     try {
         fs.statSync(thumbnailPath);
-        return Promise.resolve([]);
     }
     catch(err){
-        console.error('Error with statSync');
+        process.stdout.write('Error with statSync');
     } 
     
     easyimg.thumbnail({
@@ -25,12 +24,10 @@ function createThumbnail(imagepath){
         quality: 80
     })
     .then(function(result){
-        console.log(thumbnailPath)
+        process.stdout.write(thumbnailPath);
     }, function(err){
-        console.error(err);
+        process.stdout.write(err);
     });
-    
-    return thumbnailPath;
 }
 
 createThumbnail(process.argv[2]);

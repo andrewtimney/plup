@@ -5,14 +5,8 @@ import path from 'path'
 
 const indexFilePath = '../indexed-pics.json'
 
-export function getSavedPictures(){
-  try {
-    var pics = require(path.join(__dirname, indexFilePath));
-    return pics;
-  }
-  catch(e){
-  }
-  return [];
+export function getSavedPictures(callback){
+    fs.readFile(path.join(__dirname, indexFilePath), 'utf8', callback);
 }
 
 export function savePictures(pics) {

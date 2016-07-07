@@ -10,14 +10,22 @@ const height = 250
 const quality = 80
 
 function createThumbnail(){
-    let pics = [];
-    try {
-        pics = getSavedPictures();
-        resize(pics);
-    }
-    catch(err){
-        console.log('error getSavedPictures');
-    } 
+    getSavedPictures((err, savedFiles)=>{
+        try{
+            if(err) {
+                process.stdout.write('error getting pictures '+err);
+            }else{
+                process.stdout.write(' WIT '+savedFiles.substring(0, 10));
+                process.stdout.write(' WIT '+savedFiles.substring(-10, 10));
+                let pics = JSON.parse(savedFiles);
+                process.stdout.write('pics '+pics.length);
+                // resize(pics);
+            }
+        }
+        catch(er){
+          process.stdout.write('Damn error '+er);  
+        }
+    });
 }
 
 function resize(pics){
@@ -32,12 +40,12 @@ function resize(pics){
         
         try{
             fs.statSync(thumbnailPath);
-            console.log('Present')
+            process.stdout.write('PRESENT');
             return;
         }
         catch(err){
         } 
-        
+        console.log('doing');
         var prom = easyimg.thumbnail({
             src:pic.path, 
             dst:thumbnailPath,
@@ -45,6 +53,7 @@ function resize(pics){
             x:0, y:0,
             quality: quality
         })
+        pic.thumbnail = thumbnailPath;
         console.log(thumbnailPath);
         current.push(prom);
         
@@ -52,8 +61,10 @@ function resize(pics){
     
     Q.all(current)
     .then(()=>{
-      process.stdout.write(JSON.stringify(top));
-      resize(sliced);
+      if(top && top.length){
+        process.stdout.write(JSON.stringify(top));
+        resize(sliced);
+      }
     });
 }
 

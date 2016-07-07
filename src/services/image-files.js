@@ -13,9 +13,15 @@ export class ImageFiles {
   constructor(){
     var user = process.env.HOME || process.env.USERPROFILE;
     var dropbox = path.join(user, 'Pictures');
-    var pictures = path.join(user, 'dropbox', 'Camera Uploads');
+    var pictures = path.join(user, 'Google Drive', 'Camera Uploads');
     this.pictureFolders = [dropbox, pictures];
     ipcMain.on('start', this.getNewAndOld.bind(this));
+    ipcMain.on('thumb', this.getThumb.bind(this))
+  }
+
+  getThumb(event, arg){
+    createThumbnailProcess(arg);
+    event.sender.send('log', 'THUIMKM');
   }
 
   findImages(folder){
@@ -43,58 +49,66 @@ export class ImageFiles {
   getNewAndOld(event){
     var allFiles = [];
     var exifPromies = [];
-    var savedFiles = getSavedPictures();
+    getSavedPictures((err, savedFiles)=>{
     
-    this.pictureFolders.forEach((folder)=>{
-        var newFiles = this.getImagesAndFileDetails(folder);
-        
-        newFiles.map((picture)=>{
-            picture.dateTime = moment(0);
-            picture.date = '';
-            if(picture.path.indexOf(".png") === -1){
-                exifPromies.push(getExif(picture.path)
-                    .then((exifData)=>{
-                        if(exifData){
-                           picture.exif = exifData;
-                            this.getCreatedDate(picture);
-                        }
-                        return picture;
-                    }));
-            }
-            return picture;
-        });
-        
-        allFiles = allFiles.concat(newFiles);
-    });
-event.sender.send('log', 'returning');
-    return Promise.all(exifPromies)
-        .then((files)=>{
-            
-            let onlyNew = _.filter(allFiles, (img)=>{
-              let isOld = _.some(savedFiles, function(im){
-                return im.file.trim() === img.file.trim();
+      if(err){
+        savedFiles = [];
+      }else{
+        savedFiles = JSON.parse(savedFiles);
+      }
+
+      this.pictureFolders.forEach((folder)=>{
+          var newFiles = this.getImagesAndFileDetails(folder);
+          
+          newFiles.map((picture)=>{
+              picture.dateTime = moment(0);
+              picture.date = '';
+              if(picture.path.indexOf(".png") === -1){
+                  exifPromies.push(getExif(picture.path)
+                      .then((exifData)=>{
+                          if(exifData){
+                            picture.exif = exifData;
+                              this.getCreatedDate(picture);
+                          }
+                          return picture;
+                      }));
+              }
+              return picture;
+          });
+          
+          allFiles = allFiles.concat(newFiles);
+      }); 
+
+      Promise.all(exifPromies)
+          .then((files)=>{
+              
+              let onlyNew = _.filter(allFiles, (img)=>{
+                let isOld = _.some(savedFiles, function(im){
+                  return im.file.trim() === img.file.trim();
+                });
+                
+                if(!isOld){
+                  let found = _.find(savedFiles, {'file': img.file})
+                  console.log(img.file, found && found.file);
+                }
+                return !isOld;
               });
               
-              if(!isOld){
-                let found = _.find(savedFiles, {'file': img.file})
-                console.log(img.file, found && found.file);
-              }
-              return !isOld;
-            });
-            
-            let all = savedFiles.concat(onlyNew);
+              let all = savedFiles.concat(onlyNew);
 
-            let sorted =  _.sortBy(all, (file)=>{
-                return -file.dateTime.valueOf();
-            });
-             event.sender.send('log', 'saving');
-            savePictures(sorted);
-            
-            createThumbnailProcessAll();
-            //ipcMain.send('done', sorted);
-            event.sender.send('log', 'ending');
-            return sorted;
-        });
+              let sorted =  _.sortBy(all, (file)=>{
+                  return -file.dateTime.valueOf();
+              });
+
+              savePictures(sorted);
+
+              event.sender.send('log', 'thumbnails');
+              createThumbnailProcessAll(event);
+
+              event.sender.send('done', sorted);
+              return sorted;
+          });
+    });
   }
 
   getNewFiles(saved, allFiles){

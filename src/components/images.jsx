@@ -8,8 +8,10 @@ export class Images extends React.Component {
     this.state = {imgs:[]};
   }
   componentWillMount(){
-    ipcRenderer.on('done', ()=>{
-      console.log('done');
+    ipcRenderer.on('done', (event, pics)=>{
+      console.log('done', pics);
+      this.setState({imgs:pics});
+      //ipcRenderer.send('thumb', pics[0].path);
     });
     ipcRenderer.on('log', (event, arg)=>{
       console.log('log', arg);
@@ -26,8 +28,10 @@ export class Images extends React.Component {
     
     just.forEach(function(e, i){
         imgs.push(<div key={i}>
-          <img src="https://placehold.it/250x250" data-src={e.path} width="250" />
+          <img src={e.path} width="250" />
         </div>);
+
+        ipcRenderer.send('thumb', e.path);
     });
 
     return <div>
