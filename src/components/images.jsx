@@ -17,6 +17,10 @@ export class Images extends React.Component {
       console.log('log', arg);
     });
     ipcRenderer.send('start');
+
+    ipcRenderer.on('thumbdone', (event, arg)=>{
+      console.log('thumbdone', arg)
+    })
   }
   thumbnailCreated(result){
     console.log('thumbnailCreated', result);

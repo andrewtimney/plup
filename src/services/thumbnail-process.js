@@ -13,7 +13,9 @@ function createThumbnail(imagepath){
         fs.statSync(thumbnailPath);
     }
     catch(err){
-        process.stdout.write('Error with statSync');
+        //process.stdout.write('Error with statSync');
+        process.stdout.write(thumbnailPath);
+        return;
     } 
     
     easyimg.thumbnail({
@@ -26,7 +28,7 @@ function createThumbnail(imagepath){
     .then(function(result){
         process.stdout.write(thumbnailPath);
     }, function(err){
-        process.stdout.write(err);
+        //process.stdout.write(err);
     });
 }
 

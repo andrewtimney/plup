@@ -20,8 +20,8 @@ export class ImageFiles {
   }
 
   getThumb(event, arg){
-    createThumbnailProcess(arg);
-    event.sender.send('log', 'THUIMKM');
+    createThumbnailProcess(arg)
+      .then((result)=> event.sender.send('thumbdone', result))
   }
 
   findImages(folder){
