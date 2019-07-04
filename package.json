@@ -6,7 +6,9 @@
   "scripts": {
     "prestart": "gulp build",
     "start": "electron ./",
-    "test": "node test/build/image-files-tests"
+    "test": "node test/build/image-files-tests",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "Andrew Timney",
   "license": "ISC",
@@ -27,6 +29,8 @@
     "moment": "^2.11.2",
     "q": "^1.4.1",
     "react": "^0.14.7",
-    "react-dom": "^0.14.7"
-  }
+    "react-dom": "^0.14.7",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
